@@ -1,0 +1,82 @@
+# General
+.DS_Store
+.env
+.env.local
+.env.*.local
+*.log
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.iml
+.fleet/
+
+# Go (Backend)
+backend/main
+backend/*.exe
+backend/*.dll
+backend/*.so
+backend/*.dylib
+backend/tmp/
+backend/vendor/
+
+# Node/React (Frontend)
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+frontend/.pnp
+frontend/.pnp.js
+frontend/coverage/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# Docker
+.dockerignore
+
+# Kubernetes secrets (never commit these!)
+k8s/**/secret.yaml
+k8s/**/secrets.yaml
+*-secret.yaml
+*-secrets.yaml
+
+# Helm
+helm/*/charts/
+helm/*/*.tgz
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# macOS
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Linux
+*~
+.directory
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Logs
+logs/
+*.log
+
+# Test coverage
+*.out
+coverage/
+.nyc_output/

@@ -1,0 +1,202 @@
+.App {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.header {
+  text-align: center;
+  color: white;
+  margin-bottom: 40px;
+}
+
+.header h1 {
+  font-size: 3em;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.header p {
+  font-size: 1.2em;
+  opacity: 0.9;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  margin-bottom: 30px;
+}
+
+.form-section h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.form-group {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.form-group input {
+  flex: 1;
+  min-width: 200px;
+  padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.btn {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-danger {
+  background: #f44336;
+  color: white;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.btn-danger:hover {
+  background: #d32f2f;
+}
+
+.list-section h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.bitcoin-list {
+  list-style: none;
+}
+
+.bitcoin-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  transition: background-color 0.2s;
+}
+
+.bitcoin-item:hover {
+  background-color: #f5f5f5;
+}
+
+.bitcoin-item:last-child {
+  border-bottom: none;
+}
+
+.bitcoin-rank {
+  font-size: 24px;
+  font-weight: bold;
+  color: #667eea;
+  min-width: 50px;
+}
+
+.bitcoin-info {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 20px;
+}
+
+.bitcoin-symbol {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.bitcoin-price {
+  font-size: 24px;
+  font-weight: bold;
+  color: #4caf50;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 18px;
+}
+
+.error {
+  background: #ffebee;
+  color: #c62828;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #c62828;
+}
+
+.success {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #2e7d32;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+.empty-state p {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+  .form-group {
+    flex-direction: column;
+  }
+
+  .form-group input {
+    min-width: 100%;
+  }
+
+  .bitcoin-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .bitcoin-info {
+    width: 100%;
+    margin: 10px 0;
+  }
+
+  .header h1 {
+    font-size: 2em;
+  }
+}

@@ -1,0 +1,78 @@
+registry: t5810.webcentricds.net
+
+backend:
+  image:
+    repository: bitcoin-cache-backend
+    tag: latest
+    pullPolicy: Always
+  replicas: 2
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+
+frontend:
+  image:
+    repository: bitcoin-cache-frontend
+    tag: latest
+    pullPolicy: Always
+  replicas: 2
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "50m"
+    limits:
+      memory: "128Mi"
+      cpu: "100m"
+  service:
+    type: LoadBalancer
+    port: 80
+
+postgres:
+  image:
+    repository: postgres
+    tag: 15-alpine
+  storage:
+    size: 5Gi
+    storageClassName: manual
+  database: bitcoin_db
+  username: postgres
+  password: postgres
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+redis:
+  image:
+    repository: redis
+    tag: 7-alpine
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+
+redisinsight:
+  enabled: true
+  image:
+    repository: redis/redisinsight
+    tag: latest
+  service:
+    type: LoadBalancer
+    port: 5540
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "200m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
