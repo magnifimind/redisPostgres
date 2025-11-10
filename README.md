@@ -12,6 +12,8 @@ A production-ready caching system with Redis read-through/write-through capabili
 
 ## Architecture Overview
 
+![UI To add them](images/bitcoinCacheManager.png)
+
 * CDN Caching here is an option, for additional overhead.
 However, opted for redis only cache due to lower latency
 for changes in price
