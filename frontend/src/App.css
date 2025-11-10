@@ -1,37 +1,38 @@
 .App {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 20px 20px;
 }
 
 .header {
   text-align: center;
   color: white;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
 
 .header h1 {
-  font-size: 3em;
-  margin-bottom: 10px;
+  font-size: 2em;
+  margin-bottom: 5px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .header p {
-  font-size: 1.2em;
+  font-size: 1em;
   opacity: 0.9;
 }
 
 .card {
   background: white;
   border-radius: 12px;
-  padding: 30px;
+  padding: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .form-section h2 {
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   color: #333;
+  font-size: 1.3em;
 }
 
 .form-group {
@@ -44,10 +45,10 @@
 .form-group input {
   flex: 1;
   min-width: 200px;
-  padding: 12px 15px;
+  padding: 10px 12px;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 14px;
   transition: border-color 0.3s;
 }
 
@@ -62,10 +63,10 @@
 }
 
 .btn {
-  padding: 12px 30px;
+  padding: 10px 24px;
   border: none;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s;
@@ -105,8 +106,9 @@
 }
 
 .list-section h2 {
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   color: #333;
+  font-size: 1.3em;
 }
 
 .bitcoin-list {
@@ -117,7 +119,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 15px;
   border-bottom: 1px solid #e0e0e0;
   transition: background-color 0.2s;
 }
@@ -136,10 +138,10 @@
 }
 
 .bitcoin-rank {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold;
   color: #667eea;
-  min-width: 50px;
+  min-width: 45px;
 }
 
 .bitcoin-info {
@@ -147,17 +149,17 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 0 20px;
+  margin: 0 15px;
 }
 
 .bitcoin-symbol {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   color: #333;
 }
 
 .bitcoin-price {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold;
   color: #4caf50;
 }
