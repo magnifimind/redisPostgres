@@ -34,9 +34,9 @@ type CacheService struct {
 }
 
 const (
-	cachePrefix     = "bitcoin:"
-	rankCacheKey    = "bitcoin:rankings"
-	defaultCacheTTL = 1 * time.Hour
+	cachePrefix      = "bitcoin:"
+	rankSortedSetKey = "bitcoin:rankings:sorted" // Redis sorted set for rankings
+	defaultCacheTTL  = 1 * time.Hour
 )
 
 func NewCacheService(db *sql.DB, redisClient *redis.Client) *CacheService {
@@ -56,7 +56,7 @@ func (cs *CacheService) getBitcoinCacheKey(symbol string) string {
 func (cs *CacheService) PrimeCache() error {
 	log.Println("Starting cache priming...")
 
-	// Get all bitcoins from database
+	// Get all bitcoins from database (sorted by price for efficiency)
 	rows, err := cs.db.Query(`
 		SELECT symbol, price, created_at, updated_at
 		FROM bitcoins
@@ -68,7 +68,6 @@ func (cs *CacheService) PrimeCache() error {
 	defer rows.Close()
 
 	count := 0
-	var bitcoins []Bitcoin
 
 	for rows.Next() {
 		var b Bitcoin
@@ -77,9 +76,7 @@ func (cs *CacheService) PrimeCache() error {
 			continue
 		}
 
-		bitcoins = append(bitcoins, b)
-
-		// Cache individual bitcoin
+		// Cache individual bitcoin as JSON
 		data, err := json.Marshal(b)
 		if err != nil {
 			log.Printf("Error marshaling bitcoin %s: %v", b.Symbol, err)
@@ -92,10 +89,20 @@ func (cs *CacheService) PrimeCache() error {
 			continue
 		}
 
+		// Add to sorted set for rankings (price as score, symbol as member)
+		err = cs.redisClient.ZAdd(cs.ctx, rankSortedSetKey, redis.Z{
+			Score:  float64(b.Price),
+			Member: b.Symbol,
+		}).Err()
+		if err != nil {
+			log.Printf("Error adding %s to sorted set: %v", b.Symbol, err)
+			continue
+		}
+
 		count++
 	}
 
-	log.Printf("Cache priming completed: %d bitcoins loaded into cache", count)
+	log.Printf("Cache priming completed: %d bitcoins loaded into cache and sorted set", count)
 	return nil
 }
 
@@ -162,7 +169,7 @@ func (cs *CacheService) SetBitcoin(symbol string, price int) (*Bitcoin, error) {
 		return nil, fmt.Errorf("database error: %w", err)
 	}
 
-	// Write to cache
+	// Write to cache (individual bitcoin)
 	data, err := json.Marshal(bitcoin)
 	if err != nil {
 		log.Printf("Error marshaling bitcoin: %v", err)
@@ -173,30 +180,63 @@ func (cs *CacheService) SetBitcoin(symbol string, price int) (*Bitcoin, error) {
 		}
 	}
 
-	// Invalidate rankings cache since order may have changed
-	cs.redisClient.Del(cs.ctx, rankCacheKey)
+	// Update sorted set (ZADD automatically updates score if member exists)
+	err = cs.redisClient.ZAdd(cs.ctx, rankSortedSetKey, redis.Z{
+		Score:  float64(bitcoin.Price),
+		Member: bitcoin.Symbol,
+	}).Err()
+	if err != nil {
+		log.Printf("Error updating sorted set for %s: %v", symbol, err)
+	}
 
-	log.Printf("Write-through completed for %s", symbol)
+	log.Printf("Write-through completed for %s (price: %d)", symbol, price)
 	return &bitcoin, nil
 }
 
-// Get all bitcoins ranked by price
+// Get all bitcoins ranked by price using Redis sorted set
 func (cs *CacheService) GetBitcoinsRanked() ([]Bitcoin, error) {
-	// Try cache first
-	cached, err := cs.redisClient.Get(cs.ctx, rankCacheKey).Result()
-	if err == nil {
-		log.Println("Rankings cache HIT")
-		var bitcoins []Bitcoin
-		if err := json.Unmarshal([]byte(cached), &bitcoins); err != nil {
-			log.Printf("Error unmarshaling cached rankings: %v", err)
-		} else {
-			return bitcoins, nil
-		}
+	// Get symbols from sorted set (highest to lowest price)
+	// ZREVRANGE returns members in descending order of score
+	symbols, err := cs.redisClient.ZRevRangeWithScores(cs.ctx, rankSortedSetKey, 0, -1).Result()
+	if err != nil {
+		log.Printf("Error getting sorted set: %v, falling back to database", err)
+		return cs.getBitcoinsRankedFromDB()
 	}
 
-	log.Println("Rankings cache MISS")
+	if len(symbols) == 0 {
+		log.Println("Sorted set empty, falling back to database")
+		return cs.getBitcoinsRankedFromDB()
+	}
 
-	// Cache miss - read from database
+	log.Printf("Rankings served from Redis sorted set (%d bitcoins)", len(symbols))
+
+	var bitcoins []Bitcoin
+	rank := 1
+
+	for _, z := range symbols {
+		symbol := z.Member.(string)
+
+		// Get full bitcoin details from cache
+		bitcoin, err := cs.GetBitcoin(symbol)
+		if err != nil || bitcoin == nil {
+			log.Printf("Failed to get bitcoin %s from cache: %v", symbol, err)
+			continue
+		}
+
+		// Create a local copy of rank to avoid pointer issues
+		rankValue := rank
+		bitcoin.Rank = &rankValue
+		bitcoins = append(bitcoins, *bitcoin)
+		rank++
+	}
+
+	return bitcoins, nil
+}
+
+// Fallback: Get rankings from database (used if Redis sorted set is empty)
+func (cs *CacheService) getBitcoinsRankedFromDB() ([]Bitcoin, error) {
+	log.Println("Fetching rankings from database...")
+
 	rows, err := cs.db.Query(`
 		SELECT
 			symbol,
@@ -221,17 +261,6 @@ func (cs *CacheService) GetBitcoinsRanked() ([]Bitcoin, error) {
 		bitcoins = append(bitcoins, b)
 	}
 
-	// Cache the rankings
-	data, err := json.Marshal(bitcoins)
-	if err != nil {
-		log.Printf("Error marshaling rankings: %v", err)
-	} else {
-		err = cs.redisClient.Set(cs.ctx, rankCacheKey, data, cs.cacheTTL).Err()
-		if err != nil {
-			log.Printf("Error caching rankings: %v", err)
-		}
-	}
-
 	return bitcoins, nil
 }
 
@@ -251,13 +280,13 @@ func (cs *CacheService) DeleteBitcoin(symbol string) (*Bitcoin, error) {
 		return nil, fmt.Errorf("database error: %w", err)
 	}
 
-	// Delete from cache
+	// Delete from individual cache
 	cs.redisClient.Del(cs.ctx, cs.getBitcoinCacheKey(symbol))
 
-	// Invalidate rankings cache
-	cs.redisClient.Del(cs.ctx, rankCacheKey)
+	// Remove from sorted set
+	cs.redisClient.ZRem(cs.ctx, rankSortedSetKey, symbol)
 
-	log.Printf("Deleted %s from DB and cache", symbol)
+	log.Printf("Deleted %s from DB, cache, and sorted set", symbol)
 	return &bitcoin, nil
 }
 
