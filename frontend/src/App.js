@@ -13,6 +13,8 @@ function App() {
   // Form state
   const [symbol, setSymbol] = useState('');
   const [price, setPrice] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingSymbol, setEditingSymbol] = useState('');
 
   // Fetch bitcoins from API
   const fetchBitcoins = async () => {
@@ -52,9 +54,12 @@ function App() {
         price: parseInt(price)
       });
 
-      setSuccess(`Successfully added/updated ${symbol.toUpperCase()}`);
+      const action = isEditing ? 'updated' : 'added';
+      setSuccess(`Successfully ${action} ${symbol.toUpperCase()}`);
       setSymbol('');
       setPrice('');
+      setIsEditing(false);
+      setEditingSymbol('');
 
       // Refresh the list
       await fetchBitcoins();
@@ -65,6 +70,23 @@ function App() {
       setError('Failed to add/update bitcoin. Please try again.');
       console.error('Error adding bitcoin:', err);
     }
+  };
+
+  // Handle edit
+  const handleEdit = (bitcoin) => {
+    setSymbol(bitcoin.symbol);
+    setPrice(bitcoin.price.toString());
+    setIsEditing(true);
+    setEditingSymbol(bitcoin.symbol);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Handle cancel edit
+  const handleCancelEdit = () => {
+    setSymbol('');
+    setPrice('');
+    setIsEditing(false);
+    setEditingSymbol('');
   };
 
   // Handle delete
@@ -100,7 +122,7 @@ function App() {
       {success && <div className="card success">{success}</div>}
 
       <div className="card form-section">
-        <h2>Add / Update Bitcoin</h2>
+        <h2>{isEditing ? `Edit ${editingSymbol}` : 'Add / Update Bitcoin'}</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <input
@@ -109,6 +131,7 @@ function App() {
               value={symbol}
               onChange={(e) => setSymbol(e.target.value)}
               maxLength={10}
+              disabled={isEditing}
             />
             <input
               type="number"
@@ -117,8 +140,13 @@ function App() {
               onChange={(e) => setPrice(e.target.value)}
             />
             <button type="submit" className="btn btn-primary">
-              Save
+              {isEditing ? 'Update' : 'Save'}
             </button>
+            {isEditing && (
+              <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>
+                Cancel
+              </button>
+            )}
           </div>
         </form>
       </div>
@@ -142,12 +170,20 @@ function App() {
                   <div className="bitcoin-symbol">{bitcoin.symbol}</div>
                   <div className="bitcoin-price">${bitcoin.price.toLocaleString()}</div>
                 </div>
-                <button
-                  className="btn btn-danger"
-                  onClick={() => handleDelete(bitcoin.symbol)}
-                >
-                  Delete
-                </button>
+                <div className="bitcoin-actions">
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => handleEdit(bitcoin)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => handleDelete(bitcoin.symbol)}
+                  >
+                    Delete
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

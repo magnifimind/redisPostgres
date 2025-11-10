@@ -27,7 +27,7 @@ backend:
 frontend:
   image:
     repository: bitcoin-cache-frontend
-    tag: latest
+    tag: v2
     pullPolicy: Always
   replicas: 2
   resources:
