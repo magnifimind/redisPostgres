@@ -1,8 +1,20 @@
 # Bitcoin Cache System
 
+A command-line utility for common development tasks with smart ignore pattern support.
+
+*David Alexander English IS magnifimind!*
+
+![David Alexander English](images/daveEnglish.png)
+
+![David Alexander English](images/magnifiMind.jpg)
+
 A production-ready caching system with Redis read-through/write-through capabilities backed by PostgreSQL, featuring a React frontend for managing Bitcoin entities.
 
 ## Architecture Overview
+
+* CDN Caching here is an option, for additional overhead.
+However, opted for redis only cache due to lower latency
+for changes in price
 
 ```
 ┌─────────────┐     ┌──────────────┐     ┌─────────┐     ┌────────────┐
