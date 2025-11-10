@@ -2,8 +2,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: frontend-config
+  namespace: {{ .Values.namespace }}
   labels:
     app: frontend
+    environment: {{ .Values.environment }}
 data:
   # This will be used at build time
   REACT_APP_API_URL: http://localhost:3000

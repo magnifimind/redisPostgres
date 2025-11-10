@@ -2,10 +2,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
+  namespace: {{ .Values.namespace }}
   labels:
     app: frontend
+    environment: {{ .Values.environment }}
 spec:
-  replicas: 2
+  replicas: {{ .Values.frontend.replicas }}
   selector:
     matchLabels:
       app: frontend
@@ -13,18 +15,21 @@ spec:
     metadata:
       labels:
         app: frontend
+        environment: {{ .Values.environment }}
     spec:
+      imagePullSecrets:
+        - name: regcred
       containers:
         - name: frontend
-          image: t5810.webcentricds.net/bitcoin-cache-frontend:latest
-          imagePullPolicy: Always
+          image: "{{ .Values.registry }}/{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy | default .Values.imagePullPolicy }}
           ports:
             - containerPort: 80
               name: http
           resources:
             requests:
-              memory: "64Mi"
-              cpu: "50m"
+              memory: {{ .Values.frontend.resources.requests.memory }}
+              cpu: {{ .Values.frontend.resources.requests.cpu }}
             limits:
-              memory: "128Mi"
-              cpu: "100m"
+              memory: {{ .Values.frontend.resources.limits.memory }}
+              cpu: {{ .Values.frontend.resources.limits.cpu }}

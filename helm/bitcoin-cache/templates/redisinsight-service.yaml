@@ -1,15 +1,19 @@
+{{- if .Values.redisinsight.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
   name: redisinsight
+  namespace: {{ .Values.namespace }}
   labels:
     app: redisinsight
+    environment: {{ .Values.environment }}
 spec:
-  type: LoadBalancer
+  type: {{ .Values.redisinsight.service.type }}
   ports:
-    - port: 5540
-      targetPort: 5540
+    - port: {{ .Values.redisinsight.service.port }}
+      targetPort: {{ .Values.redisinsight.service.port }}
       protocol: TCP
       name: http
   selector:
     app: redisinsight
+{{- end }}

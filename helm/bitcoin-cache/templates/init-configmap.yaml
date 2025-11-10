@@ -2,8 +2,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: postgres-init-script
+  namespace: {{ .Values.namespace }}
   labels:
     app: postgres
+    environment: {{ .Values.environment }}
 data:
   init.sql: |
     -- Create the bitcoins table

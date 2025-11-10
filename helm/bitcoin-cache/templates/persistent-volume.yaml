@@ -1,15 +1,17 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: postgres-pv
+  name: postgres-pv-{{ .Values.namespace }}
   labels:
     app: postgres
+    environment: {{ .Values.environment }}
+    namespace: {{ .Values.namespace }}
 spec:
   capacity:
-    storage: 5Gi
+    storage: {{ .Values.postgres.storage.size }}
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: manual
+  storageClassName: {{ .Values.postgres.storage.storageClassName }}
   hostPath:
-    path: /mnt/data/postgres
+    path: /tmp/postgres-data
