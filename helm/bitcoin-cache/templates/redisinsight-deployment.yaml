@@ -1,9 +1,12 @@
+{{- if .Values.redisinsight.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redisinsight
+  namespace: {{ .Values.namespace }}
   labels:
     app: redisinsight
+    environment: {{ .Values.environment }}
 spec:
   replicas: 1
   selector:
@@ -13,23 +16,26 @@ spec:
     metadata:
       labels:
         app: redisinsight
+        environment: {{ .Values.environment }}
     spec:
       containers:
         - name: redisinsight
-          image: redis/redisinsight:latest
+          image: "{{ .Values.redisinsight.image.repository }}:{{ .Values.redisinsight.image.tag }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
-            - containerPort: 5540
+            - containerPort: {{ .Values.redisinsight.service.port }}
               name: http
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "200m"
+              memory: {{ .Values.redisinsight.resources.requests.memory }}
+              cpu: {{ .Values.redisinsight.resources.requests.cpu }}
             limits:
-              memory: "512Mi"
-              cpu: "500m"
+              memory: {{ .Values.redisinsight.resources.limits.memory }}
+              cpu: {{ .Values.redisinsight.resources.limits.cpu }}
           volumeMounts:
             - name: redisinsight-storage
               mountPath: /data
       volumes:
         - name: redisinsight-storage
           emptyDir: {}
+{{- end }}

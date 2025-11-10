@@ -1,9 +1,19 @@
+# Namespace for all resources
+namespace: ranking-scaled
+
+# Environment (development, staging, production)
+environment: development
+
+# Registry configuration
 registry: t5810.webcentricds.net
+
+# Global image pull policy (can be overridden per service)
+imagePullPolicy: Always
 
 backend:
   image:
-    repository: bitcoin-cache-backend
-    tag: latest
+    repository: bitcoin-backend
+    tag: v3
     pullPolicy: Always
   replicas: 2
   resources:
