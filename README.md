@@ -10,6 +10,71 @@ A command-line utility for common development tasks with smart ignore pattern su
 
 A production-ready caching system with Redis read-through/write-through capabilities backed by PostgreSQL, featuring a React frontend for managing Bitcoin entities.
 
+## Code implementation
+
+This covers a few more edge cases.
+- Ranks bitcoin with same price as shared ranking
+- Correctly sorts in TreeSet with record
+
+```java
+public class Symbols {
+    record Bitcoin(String symbol, int value) implements Comparable<Bitcoin> {
+        @Override
+        public int compareTo(Bitcoin o) {
+            int cmp = Integer.compare(o.value, this.value); // Descending by value
+            return cmp != 0 ? cmp : this.symbol.compareTo(o.symbol); // Tie-break by symbol
+        }
+    }
+
+    TreeSet<Bitcoin> bitcoins = new TreeSet<>();
+    Map<String, Integer> symbolValueMap = new HashMap<>();
+    Map<String, Integer> symbolRankMap = new HashMap<>();
+
+    public void addSymbol(String symbol, int value) {
+        var oldValue = symbolValueMap.get(symbol);
+        if (oldValue != null) {
+            bitcoins.remove(new Bitcoin(symbol, oldValue));
+        }
+        bitcoins.add(new Bitcoin(symbol, value));
+        symbolValueMap.put(symbol, value);
+        rebuildRank();
+    }
+
+    public int getValue(String symbol) {
+        return symbolValueMap.getOrDefault(symbol, -1);
+    }
+
+    public int getRank(String symbol) {
+        return symbolRankMap.getOrDefault(symbol, -1);
+    }
+
+    public List<String> getTopK(int k) {
+        return bitcoins.stream().map(Bitcoin::symbol).limit(k).toList();
+    }
+
+    public void remove(String symbol) {
+        var value = symbolValueMap.remove(symbol);
+        if (value != null) {
+            bitcoins.remove(new Bitcoin(symbol, value));
+            symbolRankMap.remove(symbol);
+            rebuildRank();
+        }
+    }
+
+    private void rebuildRank() {
+        symbolRankMap.clear();
+        int rank = 0;
+        Integer prevValue = Integer.MIN_VALUE;
+        for (var bc : bitcoins) {
+            if (prevValue != bc.value)
+                rank++;
+            symbolRankMap.put(bc.symbol, rank);
+            prevValue = bc.value;
+        }
+    }
+}
+```
+
 ## Architecture Overview
 
 ![UI To add them](images/bitcoinCacheManager.png)
